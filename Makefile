@@ -9,3 +9,9 @@ publish:
 
 package-install:
 	python3 -m pip install dist/*.whl
+
+project:
+	poetry run project
+
+lint:
+	poetry run ruff check .
