@@ -17,7 +17,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 packages = [
-    {include = "src"}
+    { include = "src" }
 ]
 
 [tool.poetry.scripts]
