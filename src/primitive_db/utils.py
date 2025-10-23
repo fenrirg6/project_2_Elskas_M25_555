@@ -1,7 +1,7 @@
-import os
 import json
+from pathlib import Path
 
-METADATA_FILE = "db_meta.json"
+METADATA_FILE = Path.cwd() / 'src' / 'db_meta.json'
 
 def load_metadata(filepath):
     """
@@ -12,7 +12,10 @@ def load_metadata(filepath):
         file = open(filepath, "r", encoding="utf-8")
         return json.load(file)
     except FileNotFoundError:
-        print("Файл не найден.")
+        # print("Ошибка: файл не найден.")
+        return {}
+    except json.JSONDecodeError:
+        print(f"Ошибка: файл {filepath} поврежден.")
         return {}
 
 def save_metadata(filepath, metadata):
@@ -24,7 +27,7 @@ def save_metadata(filepath, metadata):
 
     try:
         file = open(filepath, "w", encoding="utf-8")
-        json.dump(metadata, file)
+        json.dump(metadata, file, indent=4, ensure_ascii=False)
         print("Данные сохранены.")
     except json.JSONDecodeError:
         print(f"Ошибка: {filepath} поврежден!") # just in case
