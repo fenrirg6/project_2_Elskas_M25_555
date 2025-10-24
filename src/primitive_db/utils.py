@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-METADATA_FILE = Path.cwd() / 'src' / 'db_meta.json'
+# current work dir
+DATA_DIR = Path.cwd() / 'src' / 'primitive_db' / 'data'
+METADATA_FILE = Path.cwd() / 'src' / 'primitive_db' / 'db_meta.json'
 
 def load_metadata(filepath):
     """
@@ -12,25 +14,56 @@ def load_metadata(filepath):
         file = open(filepath, "r", encoding="utf-8")
         return json.load(file)
     except FileNotFoundError:
-        # print("Ошибка: файл не найден.")
         return {}
-    except json.JSONDecodeError:
-        print(f"Ошибка: файл {filepath} поврежден.")
-        return {}
+    except Exception as e:
+        print(f"Ошибка: {e}")  # just in case
+        return
 
 def save_metadata(filepath, metadata):
     """
     Сохраняет метаданные.
     """
-    if filepath is None:
-        filepath = METADATA_FILE
+    # создаем директорию если ее нет
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
     try:
         file = open(filepath, "w", encoding="utf-8")
         json.dump(metadata, file, indent=4, ensure_ascii=False)
-        print("Данные сохранены.")
-    except json.JSONDecodeError:
-        print(f"Ошибка: {filepath} поврежден!") # just in case
+        file.close()
+    except Exception as e:
+        print(f"Ошибка при сохранении: {e}") # just in case
         return
 
+def load_table_data(table_name, json_dir):
+    """
+    Загружает данные таблицы из JSON'а.
+    Возвращает [], если файл не найден.
+    """
 
+    filepath = Path(json_dir)/f"{table_name}.json"
+
+    try:
+        file = open(filepath, "r", encoding="utf-8")
+        return json.load(file)
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        print(f"Ошибка: {e}")  # just in case
+        return
+
+def save_table_data(table_name, data, json_dir):
+    """
+    Сохраняет данные таблицы в JSON.
+    """
+
+    # создаем директорию если ее нет
+    Path(json_dir).parent.mkdir(parents=True, exist_ok=True)
+
+    filepath = Path(json_dir)/f"{table_name}.json"
+
+    try:
+        file = open(filepath, "w", encoding="utf-8")
+        json.dump(data, file, ensure_ascii=False, indent=4)
+        file.close()
+    except Exception as e:
+        print(f"Ошибка при сохранении: {e}")

@@ -1,3 +1,5 @@
+from prettytable import PrettyTable
+
 ALLOWED_DATA_TYPES = {'int', 'str', 'bool'}
 
 def create_table(metadata, table_name, columns):
@@ -59,3 +61,156 @@ def list_tables(metadata):
     if not metadata:
         return "Пока не было создано ни одной таблицы."
     return "\n".join([f"- {table}" for table in metadata.keys()])
+
+
+def validate_value(value, expected_type):
+    """
+    Проверяет соответствие значения ожидаемому типу.
+    """
+    match expected_type:
+        case "int":
+            if isinstance(value, int) and not isinstance(value, bool):
+                return True, value
+            try:
+                return True, int(value)
+            except (ValueError, TypeError):
+                return False, None
+
+        case "str":
+            if isinstance(value, str):
+                return True, value
+            return True, str(value)
+
+        case "bool":
+            if isinstance(value, bool):
+                return True, value
+            if isinstance(value, str):
+                if value.lower() in ('true', '1', 'yes'):
+                    return True, True
+                if value.lower() in ('false', '0', 'no'):
+                    return True, False
+            return False, None
+
+    return False, None
+
+def insert(metadata, table_name, values, table_data):
+
+    if table_name not in metadata:
+        return metadata, f"Ошибка: таблицы {table_name} не существует."
+
+    table_schema = metadata[table_name]
+    columns = list(table_schema.keys())[1:]
+
+    if len(values) != len(columns):
+        return (table_data, f"Ошибка: ожидается {len(columns)} значений, " +
+                           f"получено {len(values)} значений")
+
+    if table_data:
+        new_id = max(row["ID"] for row in table_data) + 1
+    else:
+        new_id = 1
+
+    new_row = {"ID": new_id}
+
+    for column_name, value in zip(columns, values):
+        expected_type = table_schema[column_name]
+        is_valid, converted_value = validate_value(value, expected_type)
+
+        if not is_valid:
+            return table_data, f"Ошибка: значение {value} не соответствует типу {expected_type} для столбца {column_name}"
+
+        new_row[column_name] = converted_value
+
+    table_data.append(new_row)
+    return table_data, f"Успешно: запись в ID = {new_id} добавлена в таблицу {table_name}."
+
+def select(table_data, where_clause=None):
+    if not where_clause:
+        return table_data
+
+    filtered_data = []
+
+    for row in table_data:
+        match = True
+        for column_name, value in where_clause.items():
+            if column_name not in row or row[column_name] != value:
+                match = False
+                break
+
+        if match:
+            filtered_data.append(row)
+
+    return filtered_data
+
+def update(table_data, set_clause, where_clause=None):
+    if not where_clause:
+        return table_data, f"Ошибка: необходимо указать условие WHERE"
+
+    updated_ids = []
+
+    for row in table_data:
+        match = True
+        for column_name, value in where_clause.items():
+            if column_name not in row or row[column_name] != value:
+                match = False
+                break
+
+        if match:
+            for column_name, new_value in set_clause.items():
+                if column_name in row and column_name != "ID":
+                    row[column_name] = new_value
+            updated_ids.append(row["ID"])
+
+    if not updated_ids:
+        return table_data, f"Ошибка: записи, удовлетворяющие условию, не найдены."
+
+    ids_str = ", ".join([f"ID={id_}" for id_ in updated_ids])
+
+    return table_data, f"Успешно: запись с {ids_str} успешно обновлена."
+
+def delete(table_data, where_clause=None):
+    if not where_clause:
+        return table_data, f"Ошибка: укажите условие WHERE."
+
+    deleted_ids = []
+    new_table_data = []
+
+    for row in table_data:
+        match = True
+        for column_name, value in where_clause.items():
+            if column_name not in row or row[column_name] != value:
+                match = False
+                break
+
+        if match:
+            deleted_ids.append(row["ID"])
+        else:
+            new_table_data.append(row)
+
+    if not deleted_ids:
+        return table_data, f"Ошибка: записи, удовлетворяющие условию {where_clause}, не найдены."
+
+    ids_str = ", ".join([f"ID={id_}" for id_ in deleted_ids])
+    return new_table_data, f"Успешно: запись c {ids_str} успешно удалена из таблицы."
+
+def table_info(metadata, table_name, table_data):
+    if table_name not in metadata:
+        return f"Ошибка: таблицы {table_name} не существует."
+
+    table_schema = metadata[table_name]
+    columns_str = ", ".join([f"{name}:{type_}" for name, type_ in table_schema.items()])
+    record_count = len(table_data)
+
+    return f"Таблица: {table_name}\nСтолбцы: {columns_str}\nКоличество записей:{record_count}"
+
+def pretty_table_output(table_data, table_schema):
+    if not table_data:
+        return "Записей не найдено."
+
+    table = PrettyTable()
+    table.field_names = list(table_schema.keys())
+
+    for row in table_data:
+        table.add_row([row.get(col, '') for col in table_schema.keys()])
+
+    return str(table)
