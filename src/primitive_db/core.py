@@ -1,7 +1,10 @@
 from prettytable import PrettyTable
 
+from .decorators import confirm_action, handle_db_errors, log_time
+
 ALLOWED_DATA_TYPES = {'int', 'str', 'bool'}
 
+@handle_db_errors
 def create_table(metadata, table_name, columns):
     """
     Создает новую таблицу с заданными столбцами.
@@ -39,6 +42,8 @@ def create_table(metadata, table_name, columns):
     return (metadata, f"Успешно: таблица '{table_name}' " +
             f"успешно создана со столбцами {', '.join(parsed_columns)}.")
 
+@handle_db_errors
+@confirm_action("удаление таблицы")
 def drop_table(metadata, table_name):
     """
     Удаляет таблицу.
@@ -53,6 +58,7 @@ def drop_table(metadata, table_name):
 
     return metadata, f"Успешно: таблица '{table_name}' удалена."
 
+@handle_db_errors
 def list_tables(metadata):
     """
     Возвращает список всех таблиц.
@@ -93,8 +99,12 @@ def validate_value(value, expected_type):
 
     return False, None
 
+@handle_db_errors
+@log_time
 def insert(metadata, table_name, values, table_data):
-
+    """
+    Команда для вставки заданных кортежей в таблицу.
+    """
     if table_name not in metadata:
         return metadata, f"Ошибка: таблицы {table_name} не существует."
 
@@ -117,14 +127,21 @@ def insert(metadata, table_name, values, table_data):
         is_valid, converted_value = validate_value(value, expected_type)
 
         if not is_valid:
-            return table_data, f"Ошибка: значение {value} не соответствует типу {expected_type} для столбца {column_name}"
+            return (table_data, f"Ошибка: значение {value} не соответствует " +
+                    f"типу {expected_type} для столбца {column_name}")
 
         new_row[column_name] = converted_value
 
     table_data.append(new_row)
-    return table_data, f"Успешно: запись в ID = {new_id} добавлена в таблицу {table_name}."
+    return (table_data, f"Успешно: запись в ID = {new_id} " +
+            f"добавлена в таблицу {table_name}.")
 
+@handle_db_errors
+@log_time
 def select(table_data, where_clause=None):
+    """
+    Команда для чтения данных из таблиц. Возможно задавать условие.
+    """
     if not where_clause:
         return table_data
 
@@ -142,9 +159,13 @@ def select(table_data, where_clause=None):
 
     return filtered_data
 
+@handle_db_errors
 def update(table_data, set_clause, where_clause=None):
+    """
+    Команда для обновления значений в кортежах. Возможно задавать условие.
+    """
     if not where_clause:
-        return table_data, f"Ошибка: необходимо указать условие WHERE"
+        return table_data, "Ошибка: необходимо указать условие WHERE"
 
     updated_ids = []
 
@@ -162,15 +183,20 @@ def update(table_data, set_clause, where_clause=None):
             updated_ids.append(row["ID"])
 
     if not updated_ids:
-        return table_data, f"Ошибка: записи, удовлетворяющие условию, не найдены."
+        return table_data, "Ошибка: записи, удовлетворяющие условию, не найдены."
 
     ids_str = ", ".join([f"ID={id_}" for id_ in updated_ids])
 
     return table_data, f"Успешно: запись с {ids_str} успешно обновлена."
 
+@handle_db_errors
+@confirm_action("удаление записей")
 def delete(table_data, where_clause=None):
+    """
+    Команда для удаления кортежей. Возможно задавать условие.
+    """
     if not where_clause:
-        return table_data, f"Ошибка: укажите условие WHERE."
+        return table_data, "Ошибка: укажите условие WHERE."
 
     deleted_ids = []
     new_table_data = []
@@ -188,12 +214,17 @@ def delete(table_data, where_clause=None):
             new_table_data.append(row)
 
     if not deleted_ids:
-        return table_data, f"Ошибка: записи, удовлетворяющие условию {where_clause}, не найдены."
+        return (table_data, "Ошибка: записи, " +
+                f"удовлетворяющие условию {where_clause}, не найдены.")
 
     ids_str = ", ".join([f"ID={id_}" for id_ in deleted_ids])
     return new_table_data, f"Успешно: запись c {ids_str} успешно удалена из таблицы."
 
+@handle_db_errors
 def table_info(metadata, table_name, table_data):
+    """
+    Выводит справочную информацию по указанной таблице.
+    """
     if table_name not in metadata:
         return f"Ошибка: таблицы {table_name} не существует."
 
@@ -201,9 +232,14 @@ def table_info(metadata, table_name, table_data):
     columns_str = ", ".join([f"{name}:{type_}" for name, type_ in table_schema.items()])
     record_count = len(table_data)
 
-    return f"Таблица: {table_name}\nСтолбцы: {columns_str}\nКоличество записей:{record_count}"
+    return (f"Таблица: {table_name}\n" +
+            f"Столбцы: {columns_str}\nКоличество записей:{record_count}")
 
+@handle_db_errors
 def pretty_table_output(table_data, table_schema):
+    """
+    Обработчик вывода таблиц через PrettyTable.
+    """
     if not table_data:
         return "Записей не найдено."
 

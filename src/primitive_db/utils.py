@@ -1,14 +1,9 @@
 import json
 from pathlib import Path
 
-# current work dir
-DATA_DIR = Path.cwd() / 'src' / 'primitive_db' / 'data'
-METADATA_FILE = Path.cwd() / 'src' / 'primitive_db' / 'db_meta.json'
-
 def load_metadata(filepath):
     """
     Загружает метаданные из JSON-файла.
-    Возвращает пустой словарь, если файл не найден.
     """
     try:
         file = open(filepath, "r", encoding="utf-8")
@@ -36,10 +31,9 @@ def save_metadata(filepath, metadata):
 
 def load_table_data(table_name, json_dir):
     """
-    Загружает данные таблицы из JSON'а.
+    Загружает данные конкретной таблицы из JSON'а.
     Возвращает [], если файл не найден.
     """
-
     filepath = Path(json_dir)/f"{table_name}.json"
 
     try:
@@ -53,12 +47,10 @@ def load_table_data(table_name, json_dir):
 
 def save_table_data(table_name, data, json_dir):
     """
-    Сохраняет данные таблицы в JSON.
+    Сохраняет данные конкретной таблицы в JSON.
     """
-
     # создаем директорию если ее нет
-    Path(json_dir).parent.mkdir(parents=True, exist_ok=True)
-
+    Path(json_dir).mkdir(parents=True, exist_ok=True)
     filepath = Path(json_dir)/f"{table_name}.json"
 
     try:

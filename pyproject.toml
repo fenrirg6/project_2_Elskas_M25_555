@@ -12,7 +12,6 @@ dependencies = [
     "prettytable (>=3.16.0,<4.0.0)"
 ]
 
-
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
@@ -24,6 +23,12 @@ packages = [
 
 [tool.poetry.scripts]
 database = "primitive_db.main:main"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+ruff = "^0.14.1"
 
 [tool.ruff]
 line-length = 88
