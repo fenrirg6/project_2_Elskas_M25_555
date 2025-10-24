@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+
 def load_metadata(filepath):
     """
     Загружает метаданные из JSON-файла.

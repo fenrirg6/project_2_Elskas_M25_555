@@ -27,7 +27,7 @@ database = "primitive_db.main:main"
 [tool.poetry.dependencies]
 python = "^3.10"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 ruff = "^0.14.1"
 
 [tool.ruff]

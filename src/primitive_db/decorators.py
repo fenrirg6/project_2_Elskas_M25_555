@@ -39,21 +39,20 @@ def confirm_action(action_name):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # запрос подтверждения
-            response = input("Вы уверены, что хотите выполнить " +
-                             f"{action_name}? [y/n]: ").strip().lower()
+            # запрашиваем подтверждение
+            response = input(f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]: ').strip().lower()
 
             if response == 'y':
+                # выполняем функцию
                 return func(*args, **kwargs)
             else:
-                print("Операция отменена.")
-                # возврат безопасного значения
+                # print("Операция отменена.")
                 if len(args) > 0:
                     return args[0], "Операция отменена пользователем."
-                return None
+
+                return None, "Операция отменена пользователем."
 
         return wrapper
-
     return decorator
 
 

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import prompt
 
+from .constants import DATA_DIR, METADATA_FILE
 from .core import (
     create_table,
     delete,
@@ -15,15 +16,18 @@ from .core import (
     update,
 )
 from .decorators import create_cacher
-from .parser import parse_insert_command, parse_select_command, parse_update_command, parse_delete_command
+from .parser import (
+    parse_delete_command,
+    parse_insert_command,
+    parse_select_command,
+    parse_update_command,
+)
 from .utils import (
     load_metadata,
     load_table_data,
     save_metadata,
     save_table_data,
 )
-
-from .constants import DATA_DIR, METADATA_FILE
 
 # cacher для SELECT'ов
 select_cache = create_cacher()
@@ -115,11 +119,15 @@ def run():
                     metadata = load_metadata(METADATA_FILE)
 
                     # dropping the table and returning the message
-                    metadata, message = drop_table(metadata, table_name)
-                    print(message)
+                    result = drop_table(metadata, table_name)
+
+                    if result is None:
+                        continue
+
+                    metadata, message = result
 
                     # saving if no error
-                    if not message.startswith("Ошибка"):
+                    if message.startswith("Успешно"):
                         save_metadata(METADATA_FILE, metadata)
 
                     # dropping the corresponding JSON file
