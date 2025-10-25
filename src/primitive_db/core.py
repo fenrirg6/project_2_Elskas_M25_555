@@ -1,8 +1,8 @@
 from prettytable import PrettyTable
 
+from .constants import ALLOWED_DATA_TYPES
 from .decorators import confirm_action, handle_db_errors, log_time
 
-ALLOWED_DATA_TYPES = {'int', 'str', 'bool'}
 
 @handle_db_errors
 def create_table(metadata, table_name, columns):
