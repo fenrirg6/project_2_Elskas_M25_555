@@ -36,7 +36,7 @@
 
 ```commandline
 git clone <git@github.com:fenrirg6/project_2_Elskas_M25_555.git>
-cd maga_py_project_2_simple_db
+cd primitive_db
 ```
 
 Установите пакет через Poetry:
@@ -257,7 +257,7 @@ info users
 
 **Демонстрация в asciinema:**
 
-
+[![asciicast](https://asciinema.org/a/FXFOscpNIvgCLtoufVFPeOt34.svg)](https://asciinema.org/a/FXFOscpNIvgCLtoufVFPeOt34)
 
 Все функции защищены декоратором `@handle_db_errors` (где это уместно), который автоматически перехватывает и обрабатывает исключения:
 

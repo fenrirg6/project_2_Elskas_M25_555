@@ -12,7 +12,7 @@ def load_metadata(filepath):
     except FileNotFoundError:
         return {}
     except Exception as e:
-        print(f"Ошибка: {e}")  # just in case
+        print(f"Ошибка: '{e}'")  # just in case
         return
 
 def save_metadata(filepath, metadata):
@@ -27,7 +27,7 @@ def save_metadata(filepath, metadata):
         json.dump(metadata, file, indent=4, ensure_ascii=False)
         file.close()
     except Exception as e:
-        print(f"Ошибка при сохранении: {e}") # just in case
+        print(f"Ошибка при сохранении: '{e}'") # just in case
         return
 
 def load_table_data(table_name, json_dir):
@@ -43,7 +43,7 @@ def load_table_data(table_name, json_dir):
     except FileNotFoundError:
         return []
     except Exception as e:
-        print(f"Ошибка: {e}")  # just in case
+        print(f"Ошибка: '{e}'")  # just in case
         return
 
 def save_table_data(table_name, data, json_dir):
@@ -59,4 +59,4 @@ def save_table_data(table_name, data, json_dir):
         json.dump(data, file, ensure_ascii=False, indent=4)
         file.close()
     except Exception as e:
-        print(f"Ошибка при сохранении: {e}")
+        print(f"Ошибка при сохранении: '{e}'")

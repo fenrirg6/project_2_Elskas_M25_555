@@ -75,7 +75,7 @@ def run():
             try:
                 args = shlex.split(user_input)
             except ValueError as e:
-                print(f"Ошибка парсинга: {e}")
+                print(f"Ошибка парсинга: '{e}'")
                 continue
 
             # handling the commands
@@ -92,8 +92,8 @@ def run():
 
                 case "create_table":
                     if len(args) < 3:
-                        print(f"Ошибка: недостаточно аргументов в команде {command}. " +
-                              "Используйте: create_table <имя_таблицы> <столбец:тип>.")
+                        print(f"Ошибка: недостаточно аргументов в команде '{command}'. "
+                        + "Используйте: 'create_table <имя_таблицы> <столбец:тип>'.")
                         continue
                     table_name = args[1]
                     column_names = args[2:]
@@ -107,35 +107,35 @@ def run():
                     # saving if no error
                     if not message.startswith("Ошибка"):
                         save_metadata(METADATA_FILE, metadata)
-                        select_cache.clear()
+                        select_cache.clear() # предотвращаем stale cache
 
                 case "drop_table":
                     if len(args) < 2:
-                        print(f"Ошибка: недостаточно аргументов в команде {command}." +
-                              " Используйте: drop_table <имя_таблицы>.")
+                        print(f"Ошибка: недостаточно аргументов в команде '{command}'."
+                              + " Используйте: 'drop_table <имя_таблицы>'.")
                         continue
-                    table_name = args[1]
 
+                    table_name = args[1]
                     metadata = load_metadata(METADATA_FILE)
 
                     # dropping the table and returning the message
                     result = drop_table(metadata, table_name)
-
                     if result is None:
                         continue
 
-                    metadata, message = result
+                    new_metadata, message = result
+                    print(message)
 
                     # saving if no error
                     if message.startswith("Успешно"):
-                        save_metadata(METADATA_FILE, metadata)
+                        save_metadata(METADATA_FILE, new_metadata)
 
-                    # dropping the corresponding JSON file
-                    data_file = Path(DATA_DIR) / f"{table_name}.json"
-                    if data_file.exists():
-                        data_file.unlink()
+                        # dropping the corresponding JSON file
+                        data_file = Path(DATA_DIR) / f"{table_name}.json"
+                        if data_file.exists():
+                            data_file.unlink()
 
-                    select_cache.clear()
+                    select_cache.clear() # предотвращаем stale cache
 
                 case "list_tables":
                     metadata = load_metadata(METADATA_FILE)
@@ -154,7 +154,7 @@ def run():
 
                         if not message.startswith('Ошибка'):
                             save_table_data(table_name, table_data, DATA_DIR)
-                            select_cache.clear()
+                            select_cache.clear() # предотвращаем stale cache
 
                     except Exception as e:
                         print(f"Ошибка: {e}")
@@ -166,7 +166,7 @@ def run():
                         metadata = load_metadata(METADATA_FILE)
 
                         if table_name not in metadata:
-                            print(f'Ошибка: таблицы "{table_name}" не существует.')
+                            print(f"Ошибка: таблицы '{table_name}' не существует.")
                             continue
 
                         # создаем ключ для кэша
@@ -184,7 +184,7 @@ def run():
                                                       metadata[table_name]))
 
                     except Exception as e:
-                        print(f"Ошибка: {e}")
+                        print(f"Ошибка: '{e}'")
 
                 case "update":
                     try:
@@ -194,7 +194,7 @@ def run():
                         metadata = load_metadata(METADATA_FILE)
 
                         if table_name not in metadata:
-                            print(f'Ошибка: таблицы "{table_name}" не существует.')
+                            print(f"Ошибка: таблицы '{table_name}' не существует.")
                             continue
 
                         table_data = load_table_data(table_name, DATA_DIR)
@@ -202,12 +202,12 @@ def run():
                                                      set_clause, where_clause)
                         print(message)
 
-                        if not message.startswith('Ошибка'):
+                        if not message.startswith("Ошибка"):
                             save_table_data(table_name, table_data, DATA_DIR)
-                            select_cache.clear()
+                            select_cache.clear() # предотвращаем stale cache
 
                     except Exception as e:
-                        print(f"Ошибка: {e}")
+                        print(f"Ошибка: '{e}'")
 
                 case "delete":
                     try:
@@ -216,19 +216,19 @@ def run():
                         metadata = load_metadata(METADATA_FILE)
 
                         if table_name not in metadata:
-                            print(f'Ошибка: таблицы "{table_name}" не существует.')
+                            print(f"Ошибка: таблицы '{table_name}' не существует.")
                             continue
 
                         table_data = load_table_data(table_name, DATA_DIR)
                         table_data, message = delete(table_data, where_clause)
                         print(message)
 
-                        if not message.startswith('Ошибка'):
+                        if not message.startswith("Ошибка"):
                             save_table_data(table_name, table_data, DATA_DIR)
-                            select_cache.clear()
+                            select_cache.clear() # предотвращаем stale cache
 
                     except Exception as e:
-                        print(f"Ошибка: {e}")
+                        print(f"Ошибка: '{e}'")
 
                 case "info":
                     try:
@@ -242,10 +242,10 @@ def run():
 
                         print(table_info(metadata, table_name, table_data))
                     except Exception as e:
-                        print(f"Ошибка: {e}")
+                        print(f"Ошибка: '{e}'")
 
                 case _:
-                    print(f"Неизвестная команда {command}.")
+                    print(f"Неизвестная команда '{command}'.")
 
         except KeyboardInterrupt:
             print("\nВыполнение прервано пользователем")

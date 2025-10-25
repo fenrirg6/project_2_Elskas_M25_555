@@ -11,13 +11,13 @@ def create_table(metadata, table_name, columns):
     """
     # checking if table exists
     if table_name in metadata:
-        return metadata, f"Ошибка: таблица {table_name} уже существует."
+        return metadata, f"Ошибка: таблица '{table_name}' уже существует."
 
     parsed_columns = {}
 
     for column in columns:
         if ":" not in column:
-            return (metadata, f"Ошибка: некорректное значение {column}. " +
+            return (metadata, f"Ошибка: некорректное значение '{column}'. " +
                     "Принимается формат типа 'имя:тип'.")
 
         column_name, column_type = column.split(":", 1)
@@ -26,7 +26,7 @@ def create_table(metadata, table_name, columns):
 
         # checking for input data types
         if column_type not in ALLOWED_DATA_TYPES:
-            return (metadata, f"Ошибка: {column_type}." +
+            return (metadata, f"Ошибка: '{column_type}'." +
                     f"Допустимые типы данных: {', '.join(ALLOWED_DATA_TYPES)}.")
 
         parsed_columns[column_name] = column_type
@@ -50,7 +50,7 @@ def drop_table(metadata, table_name):
     """
     # check if table exists
     if table_name not in metadata:
-        return (metadata, f"Ошибка: таблицы {table_name} не существует." +
+        return (metadata, f"Ошибка: таблицы '{table_name}' не существует." +
                 " Проверьте корректность написания.")
 
     # deleting the table
@@ -106,14 +106,14 @@ def insert(metadata, table_name, values, table_data):
     Команда для вставки заданных кортежей в таблицу.
     """
     if table_name not in metadata:
-        return metadata, f"Ошибка: таблицы {table_name} не существует."
+        return metadata, f"Ошибка: таблицы '{table_name}' не существует."
 
     table_schema = metadata[table_name]
     columns = list(table_schema.keys())[1:]
 
     if len(values) != len(columns):
-        return (table_data, f"Ошибка: ожидается {len(columns)} значений, " +
-                           f"получено {len(values)} значений")
+        return (table_data, f"Ошибка: ожидается '{len(columns)}' значений, " +
+                           f"получено '{len(values)}' значений")
 
     if table_data:
         new_id = max(row["ID"] for row in table_data) + 1
@@ -127,14 +127,14 @@ def insert(metadata, table_name, values, table_data):
         is_valid, converted_value = validate_value(value, expected_type)
 
         if not is_valid:
-            return (table_data, f"Ошибка: значение {value} не соответствует " +
-                    f"типу {expected_type} для столбца {column_name}")
+            return (table_data, f"Ошибка: значение '{value}' не соответствует " +
+                    f"типу '{expected_type}' для столбца '{column_name}'")
 
         new_row[column_name] = converted_value
 
     table_data.append(new_row)
     return (table_data, f"Успешно: запись в ID = {new_id} " +
-            f"добавлена в таблицу {table_name}.")
+            f"добавлена в таблицу '{table_name}'.")
 
 @handle_db_errors
 @log_time
@@ -187,7 +187,7 @@ def update(table_data, set_clause, where_clause=None):
 
     ids_str = ", ".join([f"ID={id_}" for id_ in updated_ids])
 
-    return table_data, f"Успешно: запись с {ids_str} успешно обновлена."
+    return table_data, f"Успешно: запись с '{ids_str}' успешно обновлена."
 
 @handle_db_errors
 @confirm_action("удаление записей")
@@ -215,10 +215,10 @@ def delete(table_data, where_clause=None):
 
     if not deleted_ids:
         return (table_data, "Ошибка: записи, " +
-                f"удовлетворяющие условию {where_clause}, не найдены.")
+                f"удовлетворяющие условию '{where_clause}', не найдены.")
 
     ids_str = ", ".join([f"ID={id_}" for id_ in deleted_ids])
-    return new_table_data, f"Успешно: запись c {ids_str} успешно удалена из таблицы."
+    return new_table_data, f"Успешно: запись c '{ids_str}' успешно удалена из таблицы."
 
 @handle_db_errors
 def table_info(metadata, table_name, table_data):
@@ -226,7 +226,7 @@ def table_info(metadata, table_name, table_data):
     Выводит справочную информацию по указанной таблице.
     """
     if table_name not in metadata:
-        return f"Ошибка: таблицы {table_name} не существует."
+        return f"Ошибка: таблицы '{table_name}' не существует."
 
     table_schema = metadata[table_name]
     columns_str = ", ".join([f"{name}:{type_}" for name, type_ in table_schema.items()])

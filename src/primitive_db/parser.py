@@ -19,7 +19,7 @@ def where_clause_parser(where_clause):
     match = re.match(r"(\w+)\s*=\s*(.+)", where_clause)
 
     if not match:
-        raise ValueError(f"Ошибка: некорректное условие {where_clause}")
+        raise ValueError(f"Ошибка: некорректное условие '{where_clause}'")
 
     column = match.group(1)
     value = match.group(2)
@@ -41,10 +41,10 @@ def set_clause_parser(set_clause):
         part = part.strip()
         # group1 [a-zA-Z0-9_] + any number of spaces + =
         # + any number of spaces + group2 [a-zA-Z0-9_] except for \n
-        match = re.match(r'(\w+)\s*=\s*(.+)', part)
+        match = re.match(r"(\w+)\s*=\s*(.+)", part)
 
         if not match:
-            raise ValueError(f"Ошибка: некорректное условие {set_clause}")
+            raise ValueError(f"Ошибка: некорректное условие '{set_clause}'")
 
         column = match.group(1)
         value = match.group(2)
@@ -67,9 +67,9 @@ def parse_value(value):
         return value_str[1:-1]
 
     # булеан
-    if value_str.lower() == 'true':
+    if value_str.lower() == "true":
         return True
-    if value_str.lower() == 'false':
+    if value_str.lower() == "false":
         return False
 
     # число
@@ -87,7 +87,7 @@ def parse_values(values):
     """
     values_str = values.strip()
 
-    if values_str.startswith('(') and values_str.endswith(')'):
+    if values_str.startswith("(") and values_str.endswith(")"):
         values_str = values_str[1:-1]
 
     # разбираем с shlex
@@ -96,7 +96,7 @@ def parse_values(values):
 
     for part in parts:
         # убираем запятые
-        part = part.rstrip(',')
+        part = part.rstrip(",")
         if part:
             values.append(parse_value(part))
 
@@ -109,7 +109,7 @@ def parse_insert_command(user_input):
     """
     Парсит команду INSERT.
     """
-    match = re.match(r'insert\s+into\s+(\w+)\s+values\s*(.+)',
+    match = re.match(r"insert\s+into\s+(\w+)\s+values\s*(.+)",
                      user_input, re.IGNORECASE)
     if not match:
         raise ValueError("Некорректный формат команды.")
@@ -125,7 +125,7 @@ def parse_select_command(user_input):
     """
     Парсит команду SELECT.
     """
-    match = re.match(r'select\s+from\s+(\w+)(?:\s+where\s+(.+))?',
+    match = re.match(r"select\s+from\s+(\w+)(?:\s+where\s+(.+))?",
                      user_input, re.IGNORECASE)
     if not match:
         raise ValueError("Некорректный формат команды.")
@@ -141,7 +141,7 @@ def parse_update_command(user_input):
     """
     Парсит команду UPDATE.
     """
-    match = re.match(r'update\s+(\w+)\s+set\s+(.+?)\s+where\s+(.+)',
+    match = re.match(r"update\s+(\w+)\s+set\s+(.+?)\s+where\s+(.+)",
                      user_input, re.IGNORECASE)
     if not match:
         raise ValueError("Некорректный формат команды.")
@@ -160,7 +160,7 @@ def parse_delete_command(user_input):
     """
     Парсит команду DELETE.
     """
-    match = re.match(r'delete\s+from\s+(\w+)\s+where\s+(.+)',
+    match = re.match(r"delete\s+from\s+(\w+)\s+where\s+(.+)",
                      user_input, re.IGNORECASE)
     if not match:
         raise ValueError("Некорректный формат команды.")
